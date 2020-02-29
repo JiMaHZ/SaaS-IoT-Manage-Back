@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.modules.iot.mapper.AshbinMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="ashbinResultMap" type="org.springblade.modules.iot.entity.Ashbin">
+        <id column="device_id" property="deviceId"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="additional_info" property="additionalInfo"/>
+        <result column="ashbin_status" property="ashbinStatus"/>
+        <result column="p_origin" property="pOrigin"/>
+        <result column="p_branch" property="pBranch"/>
+        <result column="user_id" property="userId"/>
+        <result column="last_update_time" property="lastUpdateTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+
+    <select id="selectAshbinPage" resultMap="ashbinResultMap">
+        select * from ashbin where is_deleted = 0
+    </select>
+
+</mapper>

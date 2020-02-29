@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.modules.iot.mapper.DeviceStatusMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="deviceStatusResultMap" type="org.springblade.modules.iot.entity.DeviceStatus">
+        <id column="device_id" property="deviceId"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="device_status" property="deviceStatus"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="remote_address" property="remoteAddress"/>
+        <result column="last_update_time" property="lastUpdateTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+
+    <select id="selectDeviceStatusPage" resultMap="deviceStatusResultMap">
+        select * from device_status where is_deleted = 0
+    </select>
+
+</mapper>

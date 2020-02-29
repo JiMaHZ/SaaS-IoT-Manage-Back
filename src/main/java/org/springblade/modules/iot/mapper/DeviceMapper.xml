@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.modules.iot.mapper.DeviceMapper">
+
+    <!-- 通用查询映射结果 -->
+<!--    <resultMap id="deviceAttributeResultMap" type="org.springblade.modules.iot.entity.DeviceAttribute">-->
+<!--        <id column="device_id" property="deviceId"/>-->
+<!--        <result column="device_name" property="deviceName"/>-->
+<!--        <result column="additional_info" property="additionalInfo"/>-->
+<!--        <result column="type" property="type"/>-->
+<!--        <result column="gateway_address" property="gatewayAddress"/>-->
+<!--        <result column="collector_address" property="collectorAddress"/>-->
+<!--        <result column="user_id" property="userId"/>-->
+<!--        <result column="modify_time" property="modifyTime"/>-->
+<!--        <result column="create_time" property="createTime"/>-->
+<!--    </resultMap>-->
+
+
+<!--    <select id="selectDeviceAttributePage" resultMap="deviceAttributeResultMap">-->
+<!--        select * from device_attribute where is_deleted = 0-->
+<!--    </select>-->
+<!--    Device getDeviceById(String deviceId);-->
+
+    <select id="getDeviceById" resultType="device">
+        select * from device where device_id=#{deviceId}
+    </select>
+
+    <resultMap id="deviceLocation" type="device">
+        <id column="gateway_address" property="gatewayAddress"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="lat" property="lat"/>
+        <result column="lng" property="lng"/>
+        <result column="modify_time" property="modifyTime"/>
+    </resultMap>
+
+    <select id="getDeviceListWithBindId" resultMap="deviceLocation">
+        select * from device where device_id is not null
+    </select>
+
+    <select id="getDeviceListWithBindIdAndType" resultMap="deviceLocation">
+        select a.gateway_address,a.iccid,a.lat,a.lng,a.modify_time,b.device_id, b.device_name,b.device_type,b.device_status
+        from device a,device_status b
+        where a.device_id=b.device_id and a.device_id is not null and b.device_type=#{deviceType}
+    </select>
+
+
+    <select id="getDeviceListWithoutBindId" resultMap="deviceLocation">
+        select * from device where device_id is null
+    </select>
+
+    <update id="setDeviceId">
+        update device set device_id=#{deviceId},modify_time=now() where gateway_address=#{gatewayAddress}
+    </update>
+
+</mapper>

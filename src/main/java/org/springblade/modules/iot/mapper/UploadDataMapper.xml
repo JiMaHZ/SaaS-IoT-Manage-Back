@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.modules.iot.mapper.UploadDataMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="uploadDataResultMap" type="org.springblade.modules.iot.entity.UploadData">
+        <id column="id" property="id"/>
+        <result column="gateway_address" property="gatewayAddress"/>
+        <result column="collector_address" property="collectorAddress"/>
+        <result column="command" property="command"/>
+        <result column="device_key" property="deviceKey"/>
+        <result column="device_value" property="deviceValue"/>
+        <result column="upload_time" property="uploadTime"/>
+        <result column="remote_address" property="remoteAddress"/>
+    </resultMap>
+
+
+    <select id="selectUploadDataPage" resultMap="uploadDataResultMap">
+        select * from upload_data where is_deleted = 0
+    </select>
+
+<!--    UploadData getLatestDataByGatewayAddress(String gatewayAddress);-->
+<!--    UploadData getLatestDataByGatewayAddressAndKey(@Param("gatewayAddress")String gatewayAddress,-->
+<!--    @Param("deviceKey")String deviceKey);-->
+    <select id="getLatestDataByGatewayAddress" resultMap="uploadDataResultMap">
+        select * from upload_data where gateway_address=#{gatewayAddress} order by id desc limit 1
+    </select>
+
+
+    <select id="getLatestDataByGatewayAddressAndKey" resultMap="uploadDataResultMap">
+        select * from upload_data
+        where
+        gateway_address=#{gatewayAddress}
+        and
+        device_key=#{deviceKey}
+        order by id desc limit 1
+    </select>
+
+</mapper>
