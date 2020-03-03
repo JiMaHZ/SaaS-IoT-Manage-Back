@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.springblade.modules.iot.mapper.DeviceKeyMapper">
+
+    <!-- 通用查询映射结果 -->
+<!--    <resultMap id="deviceStatusResultMap" type="org.springblade.modules.iot.entity.DeviceStatus">-->
+<!--        <id column="device_id" property="deviceId"/>-->
+<!--        <result column="device_name" property="deviceName"/>-->
+<!--        <result column="device_status" property="deviceStatus"/>-->
+<!--        <result column="device_type" property="deviceType"/>-->
+<!--        <result column="remote_address" property="remoteAddress"/>-->
+<!--        <result column="last_update_time" property="lastUpdateTime"/>-->
+<!--        <result column="create_time" property="createTime"/>-->
+<!--    </resultMap>-->
+    <select id="getListKeyById" resultType="deviceKey">
+        select * from device_key where device_id=#{deviceId}
+    </select>
+
+    <select id="getByIdandKey" resultType="deviceKey">
+        select * from device_key where device_id=#{deviceId} and device_key=#{deviceKey}
+    </select>
+
+    <insert id="saveDeviceKey">
+        insert into device_key
+        (device_id,device_key,key_name,min,max,data_step,
+        data_origin_width,unit,data_type,rule,modify_time,create_time)
+        values
+        (#{deviceId},#{deviceKey},#{keyName},#{min},#{max},#{dataStep},
+        #{dataOriginWidth},#{unit},#{dataType},#{rule},now(),now())
+    </insert>
+
+    <update id="updateDeviceKey">
+        update
+        device_key
+        set
+        key_name=#{keyName},min=#{min},max=#{max},data_step=#{dataStep},
+        data_origin_width=#{dataOriginWidth},unit=#{unit},data_type=#{dataType},
+        rule=#{rule},modify_time=now()
+        where device_id=#{deviceId} and device_key=#{deviceKey}
+    </update>
+
+</mapper>
