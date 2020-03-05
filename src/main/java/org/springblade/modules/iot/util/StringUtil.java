@@ -32,8 +32,9 @@ public class StringUtil {
 
 	public static void main(String[] args) {
 //		System.out.println(paddingLeft("cd", 4));
-		System.out.println(Integer.parseInt("0B00",16));
-		System.out.println(Integer.parseInt("0900",16));
+//		System.out.println(Integer.parseInt("0B00",16));
+//		System.out.println(Integer.parseInt("0900",16));
+
 	}
 
 }

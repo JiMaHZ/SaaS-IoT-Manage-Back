@@ -3,6 +3,7 @@ package org.springblade.modules.iot.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springblade.modules.iot.entity.DeviceKey;
+import org.springblade.modules.iot.entity.DeviceStatus;
 import org.springblade.modules.iot.entity.UploadData;
 import org.springblade.modules.iot.exception.CannotFindException;
 import org.springblade.modules.iot.mapper.DeviceKeyMapper;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +30,9 @@ public class DeviceKeyServiceImpl extends ServiceImpl<DeviceKeyMapper, DeviceKey
 	@Autowired
 	private UploadDataServiceImpl uploadDataService;
 
+	@Resource
+	private DeviceStatusServiceImpl deviceStatusService;
+
 	@Override
 	public boolean saveOrUpdateDeviceKey(DeviceKey deviceKey) {
 		if (deviceKey == null) {
@@ -44,65 +49,84 @@ public class DeviceKeyServiceImpl extends ServiceImpl<DeviceKeyMapper, DeviceKey
 	}
 
 	@Override
-	public Map<String,String> getLatestList(String deviceId) {
-
-		return null;
+	public Map<String, Object> getLatestList(String deviceId) {
+		Map<String, Object> map = new HashMap<>();
+		try {
+			DeviceStatus device = deviceStatusService.getById(deviceId);
+			if (device != null) {
+				map.put("deviceName", device.getDeviceName());
+			} else {
+				map.put("deviceName", null);
+			}
+			List<DeviceKey> list = getLatestListAttr(deviceId);
+			map.put("data", list);
+		} catch (CannotFindException e) {
+			throw new CannotFindException(e.getMessage());
+		}
+		return map;
 	}
 
 	@Override
 	public List<DeviceKey> getLatestListAttr(String deviceId) {
-		List<DeviceKey> listAttr = new ArrayList<>();
-		//0900的上下限
-		int upper0900 = Integer.parseInt("091F",16);
-		int lower0900 = Integer.parseInt("0900",16);
-		//0b00的上下限
-		int upper0B00 = Integer.parseInt("0B1F",16);
-		int lower0B00 = Integer.parseInt("0B00",16);
-		int keyindex = 0;
-		String[] key0900 = null;
-		String[] key0B00 = null;
+		List<DeviceKey> listKey = deviceKeyMapper.getListKeyById(deviceId);
 		try {
-			UploadData key0900Str = uploadDataService.getDataByDeviceIdAndKey(deviceId, "0900");
-			UploadData key0B00Str = uploadDataService.getDataByDeviceIdAndKey(deviceId, "0B00");
-
-			if(key0900Str != null){
-				key0900 = stringToArray(key0900Str.getDeviceValue());
-			}
-			if(key0B00Str != null){
-				key0B00 = stringToArray(key0B00Str.getDeviceValue());
-			}
-
-			//key属性列表
-			List<DeviceKey> listKey = deviceKeyMapper.getListKeyById(deviceId);
-			for (DeviceKey deviceKey : listKey) {
-				int key = Integer.parseInt(deviceKey.getDeviceKey(),16);
-				if(key>= lower0900 && key <= upper0900){
-					keyindex = (key - lower0900)/4;
-					if(keyindex < key0900.length){
-						deviceKey.setValue(key0900[keyindex].trim());
-						deviceKey.setModifyTime(key0900Str.getUploadTime());
-						listAttr.add(deviceKey);
-					}
-				}
-				if(key>= lower0B00 && key <= upper0B00){
-					keyindex = (key - lower0B00)/4;
-					if(keyindex < key0B00.length){
-						deviceKey.setValue(key0B00[keyindex].trim());
-						deviceKey.setModifyTime(key0B00Str.getUploadTime());
-						listAttr.add(deviceKey);
-					}
-				}
-			}
-		}catch (CannotFindException e){
+			getDeviceValueByKey(deviceId, listKey, "0900");
+			getDeviceValueByKey(deviceId, listKey, "0B00");
+		} catch (CannotFindException e) {
 			throw new CannotFindException(e.getMessage());
-		}catch (Exception e){
+		}
+		return listKey;
+	}
+
+	public void getDeviceValueByKey(String deviceId, List<DeviceKey> deviceKeys, String key) {
+		int keyindex = 0;
+		String[] keyArr = null;
+		int lower = Integer.parseInt(key, 16);
+		int upper = lower + Integer.parseInt("1F", 16);
+		try {
+			UploadData uploadData = uploadDataService.getDataByDeviceIdAndKey(deviceId, key);
+			if (uploadData != null) {
+				keyArr = stringToArray(uploadData.getDeviceValue());
+			}
+			for (DeviceKey deviceKey : deviceKeys) {
+				int tempKey = Integer.parseInt(deviceKey.getDeviceKey(), 16);
+				if (keyArr != null && tempKey >= lower && tempKey <= upper) {
+					keyindex = (tempKey - lower) / 4;
+					if (keyindex < keyArr.length) {
+						if (deviceKey.getMin() == null || deviceKey.getMin().trim().length() == 0) {
+							deviceKey.setValue(keyArr[keyindex].trim());
+						} else {
+							DecimalFormat df;
+							double result;
+							String type = deviceKey.getDataType();
+							int originLen = Integer.parseInt(deviceKey.getDataOriginWidth().trim());
+							int min = Integer.parseInt(deviceKey.getMin().trim());
+							int max = Integer.parseInt(deviceKey.getMax().trim());
+							int originValue = Integer.parseInt(keyArr[keyindex].trim());
+							System.out.println("  " + deviceKey.getDeviceKey() + " value: " + originValue);
+							if (max == min) {
+								result = min;
+							} else {
+								result = originValue * (originLen * 1.0 / (max - min)) + min;
+							}
+							if (type.equals("int")) {
+								df = new DecimalFormat("0");
+							} else {
+								df = new DecimalFormat("0.00");
+							}
+							deviceKey.setValue(df.format(result));
+						}
+						deviceKey.setModifyTime(uploadData.getUploadTime());
+					}
+				}
+				System.out.println("key:" + deviceKey.getDeviceKey() + " value: " + deviceKey.getValue());
+			}
+		} catch (CannotFindException e) {
+			throw new CannotFindException(e.getMessage());
+		} catch (Exception e) {
 			throw new CannotFindException("未配置相关属性！");
 		}
 
-		return listAttr;
-	}
-
-	public void getDeviceValueByKey(List<DeviceKey> deviceKeys,String key){
 
 	}
 

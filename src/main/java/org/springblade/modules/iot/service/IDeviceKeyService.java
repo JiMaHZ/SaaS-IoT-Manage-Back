@@ -17,9 +17,10 @@ public interface IDeviceKeyService extends IService<DeviceKey> {
 	List<DeviceKey> getLatestListAttr(String deviceId);
 
 	/**
-	 * 获取属性列表 keyName value
+	 * 获取属性列表 deviceName keyName value（包含设备名，无规则）
 	 * @param deviceId
 	 * @return
 	 */
-	Map<String,String> getLatestList(String deviceId);
+	Map<String, Object> getLatestList(String deviceId);
+
 }
