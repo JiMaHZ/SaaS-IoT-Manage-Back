@@ -103,7 +103,7 @@ public class DeviceKeyServiceImpl extends ServiceImpl<DeviceKeyMapper, DeviceKey
 							int min = Integer.parseInt(deviceKey.getMin().trim());
 							int max = Integer.parseInt(deviceKey.getMax().trim());
 							int originValue = Integer.parseInt(keyArr[keyindex].trim());
-							System.out.println("  " + deviceKey.getDeviceKey() + " value: " + originValue);
+//							System.out.println("  " + deviceKey.getDeviceKey() + " value: " + originValue);
 							if (max == min) {
 								result = min;
 							} else {
@@ -119,7 +119,7 @@ public class DeviceKeyServiceImpl extends ServiceImpl<DeviceKeyMapper, DeviceKey
 						deviceKey.setModifyTime(uploadData.getUploadTime());
 					}
 				}
-				System.out.println("key:" + deviceKey.getDeviceKey() + " value: " + deviceKey.getValue());
+//				System.out.println("key:" + deviceKey.getDeviceKey() + " value: " + deviceKey.getValue());
 			}
 		} catch (CannotFindException e) {
 			throw new CannotFindException(e.getMessage());
@@ -134,8 +134,24 @@ public class DeviceKeyServiceImpl extends ServiceImpl<DeviceKeyMapper, DeviceKey
 		return retBool(deviceKeyMapper.updateDeviceKey(deviceKey));
 	}
 
+	@Override
+	public boolean removeDeviceByIdAndKey(String deviceId, String deviceKey) {
+		if(deviceId != null && deviceKey != null){
+			try {
+				return deleteDaviceKeyByIdAndKey(deviceId,deviceKey);
+			}catch (Exception e){
+				throw new CannotFindException(e.getMessage());
+			}
+		}else {
+			throw new CannotFindException("该设备下未找到此Key！");
+		}
+	}
+
 	public boolean saveDeviceKey(DeviceKey deviceKey) {
 		return retBool(deviceKeyMapper.saveDeviceKey(deviceKey));
 	}
 
+	public boolean deleteDaviceKeyByIdAndKey(String deviceId,String deviceKey){
+		return retBool(deviceKeyMapper.deleteDeviceKeyByidandKey(deviceId,deviceKey));
+	}
 }

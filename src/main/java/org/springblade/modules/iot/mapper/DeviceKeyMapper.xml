@@ -38,5 +38,11 @@
         rule=#{rule},modify_time=now()
         where device_id=#{deviceId} and device_key=#{deviceKey}
     </update>
+<!--    deleteDeviceKeyByidandKey-->
+    <delete id="deleteDeviceKeyByidandKey">
+        delete
+        from device_key
+        where device_id=#{deviceId} and device_key=#{deviceKey}
+    </delete>
 
 </mapper>

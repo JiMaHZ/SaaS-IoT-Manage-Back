@@ -34,6 +34,31 @@ public class DeviceKeyController {
 		return R.status(deviceKeyService.saveOrUpdateDeviceKey(deviceKey));
 	}
 
+	/**
+	 * 修改
+	 * @param deviceKey
+	 * @return
+	 */
+	@PostMapping("/update")
+	public R update(@Valid @RequestBody DeviceKey deviceKey) {
+		return R.status(deviceKeyService.updateDeviceKey(deviceKey));
+	}
+
+	/**
+	 * 删除
+	 * @param deviceId
+	 * @param deviceKey
+	 * @return
+	 */
+	@PostMapping("/remove")
+	public R remove( @RequestParam String deviceId,@RequestParam String deviceKey) {
+		try{
+			return R.status(deviceKeyService.removeDeviceByIdAndKey(deviceId,deviceKey));
+		}catch (Exception e){
+			return R.fail(e.getMessage());
+		}
+	}
+
 
 	/**
 	 * 获取deviceId相关的key列表对应的属性（包括value）
@@ -53,8 +78,13 @@ public class DeviceKeyController {
 		return R.data(list);
 	}
 
+	/**
+	 * 获取deviceId相关的key列表对应的属性（包括value）以及设备名
+	 * @param deviceId
+	 * @return
+	 */
 	@GetMapping("/list")
-	public R getOneValueById(String deviceId){
+	public R getLatestList(String deviceId){
 		Map<String,Object> map = new HashMap<>();
 		try{
 			map = deviceKeyService.getLatestList(deviceId);
